@@ -1,4 +1,12 @@
-from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    String,
+    Float,
+    Integer,
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 import datetime
@@ -26,6 +34,8 @@ class ShopifyOrder(Base):
 
 class RoasReport(Base):
     __tablename__ = "roas_reports"
+    __table_args__ = (UniqueConstraint("campaign_id", name="uq_roas_campaign"),)
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     campaign_id = Column(String, ForeignKey("campaigns.id"))
     shopify_revenue = Column(Float)
@@ -34,3 +44,16 @@ class RoasReport(Base):
     roas = Column(Float)  # shopify_revenue / ad_spend
     discrepancy = Column(Float)  # (google - shopify) / shopify
     calculated_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class DailyMetric(Base):
+    __tablename__ = "daily_metrics"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    campaign_id = Column(String, ForeignKey("campaigns.id"))
+    date = Column(DateTime)
+    ad_spend = Column(Float)
+    impressions = Column(Integer)
+    clicks = Column(Integer)
+    revenue = Column(Float)
+    roas = Column(Float)
