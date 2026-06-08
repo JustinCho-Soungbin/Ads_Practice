@@ -80,6 +80,12 @@ FastAPI · PostgreSQL · Google Ads API · Shopify Admin API · LangGraph · Nex
 - 출력: 구간별 재구성 오차 + 임계값 초과 시 이상 구간 표시
 - 실사용: 광고 ROAS 급락 구간 자동 감지
 
+## 모델 한계점 및 개선 계획
+
+- CTR 예측 (GradientBoosting): 현재 mock 데이터 기반이라 R² -0.19로 낮음. 실제 데이터 붙으면 개선 예정
+- LSTM Autoencoder: 데이터 60일치라 학습 불안정. 실제 운영 데이터 쌓이면 성능 향상 예정
+- Isolation Forest: 캠페인 3개 기반이라 이상 감지 기준 단순함. 데이터 늘어나면 정교해짐
+
 ## 메모
 
 - Shopify: 더미 주문으로 테스트
