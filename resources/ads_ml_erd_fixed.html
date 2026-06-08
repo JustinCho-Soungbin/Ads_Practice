@@ -1,0 +1,90 @@
+
+<div id="erd" style="padding: 1rem 0"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#e0dfd8' : '#2c2c2a',
+    primaryTextColor: dark ? '#e0dfd8' : '#2c2c2a',
+    attributeBackgroundColorEven: dark ? '#2a2a28' : '#f5f4ef',
+    attributeBackgroundColorOdd: dark ? '#323230' : '#ffffff',
+    primaryColor: dark ? '#3a3a38' : '#eeedfe',
+    primaryBorderColor: dark ? '#5a5a56' : '#534ab7',
+  },
+});
+const { svg } = await mermaid.render('erd-svg', `erDiagram
+  Campaign ||--o{ ShopifyOrder : "attributed to"
+  Campaign ||--o{ RoasReport : "generates"
+
+  Campaign {
+    string id PK
+    string name
+    float ad_spend
+    int impressions
+    int clicks
+    float google_reported_revenue
+    datetime created_at
+  }
+
+  ShopifyOrder {
+    string id PK
+    int order_number
+    float total_price
+    string campaign_id FK
+    datetime created_at
+  }
+
+  RoasReport {
+    int id PK
+    string campaign_id FK
+    float shopify_revenue
+    float google_reported_revenue
+    float ad_spend
+    float roas
+    float discrepancy
+    datetime calculated_at
+  }
+`);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg .row-rect-odd path, #erd svg .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+
+if (dark) {
+  document.querySelectorAll('#erd svg text').forEach(t => {
+    if (!t.getAttribute('fill') || t.getAttribute('fill') === '#000' || t.getAttribute('fill') === 'black') {
+      t.setAttribute('fill', '#e0dfd8');
+    }
+  });
+}
+</script>
